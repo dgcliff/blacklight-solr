@@ -52,10 +52,10 @@
           title_tsi
           author_tsim
           subject_tsim
-          all_text_timv
+          full_text_tesimv
         </str>
         <str name="pf">
-          all_text_timv^10
+          full_text_tesimv^10
         </str>
 
        <str name="author_qf">

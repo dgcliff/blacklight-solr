@@ -44,17 +44,13 @@
             http://wiki.apache.org/solr/LocalParams
        -->
         <str name="qf">
-          id
-          full_title_tsim
-          short_title_tsim
-          alternative_title_tsim
-          active_fedora_model_ssi
-          title_tsi
-          author_tsim
-          subject_tsim
-          full_text_tesimv
+	  title_tsim^10
+          description_tsim^5
+          alternate_ids_tsim^3	
+	  full_text_tesimv
         </str>
-        <str name="pf">
+	<str name="pf">
+	  title_tsim^20
           full_text_tesimv^10
         </str>
 
@@ -64,10 +60,7 @@
        <str name="author_pf">
        </str>
        <str name="title_qf">
-          title_tsi
-          full_title_tsim
-          short_title_tsim
-          alternative_title_tsim
+	  title_tsim
        </str>
        <str name="title_pf">
        </str>

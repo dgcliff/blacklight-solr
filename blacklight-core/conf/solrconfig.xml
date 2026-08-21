@@ -45,10 +45,22 @@
        -->
         <str name="qf">
 	  title_tsim^10
+	  title_plain_tsim
           description_tsim^5
           alternate_ids_tsim^3	
 	  full_text_tesimv
         </str>
+	<!-- A Person is a first-class catalog result, but on an empty query every
+	     doc scores exactly 1.0, so Blacklight's default "score desc,
+	     created_at_dtsi desc" sort ranks purely by recency, so a bulk People
+	     import floats all of them above the whole repository. Demote a Person
+	     multiplicatively so they sort below everything else once scores tie.
+
+	     0.9 and not lower: on an empty query ANY factor below 1 separates the
+	     groups completely, while a harder demotion starts losing real searches.
+	     Measured on a name query against a Work titled after that same person,
+	     0.5 and 0.1 both rank the Work above the person; 0.9 does not. -->
+	<str name="boost">if(exists(query({!v='internal_resource_tesim:Person'})),0.9,1)</str>
 	<str name="pf">
 	  title_tsim^20
           full_text_tesimv^10

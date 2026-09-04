@@ -43,11 +43,24 @@
             those searches. You may also be interested in:
             http://wiki.apache.org/solr/LocalParams
        -->
+       <!-- title_variant_tesim carries the alternative, uniform, translated and
+            abbreviated titles Atlas indexes. Boosted below the primary title: a
+            variant is a real way to find a record, but a match on the title a
+            record leads with is the better hit. identifier_tesim is the DOI or
+            call number a reader pastes in whole, unboosted because an
+            identifier match is exact or it is nothing.
+
+            Both notes sit outside the element on purpose. A comment inside it
+            risks a parser reading only the text before the comment, and that
+            failure is silent: search simply stops matching.
+       -->
         <str name="qf">
 	  title_tsim^10
 	  title_plain_tsim
+	  title_variant_tesim^4
           description_tsim^5
           alternate_ids_tsim^3	
+	  identifier_tesim
 	  full_text_tesimv
         </str>
 	<!-- A Person is a first-class catalog result, but on an empty query every

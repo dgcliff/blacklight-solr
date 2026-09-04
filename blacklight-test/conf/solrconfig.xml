@@ -50,6 +50,12 @@
             call number a reader pastes in whole, unboosted because an
             identifier match is exact or it is nothing.
 
+            subject_title_tesim is a work a record is ABOUT, and contents_tesim
+            is its chapter list. Both unboosted. A subject title should not
+            compete with the record's own title, and a contents list is long and
+            keyword-dense enough that any boost would let it outrank a real
+            abstract.
+
             Both notes sit outside the element on purpose. A comment inside it
             risks a parser reading only the text before the comment, and that
             failure is silent: search simply stops matching.
@@ -61,6 +67,8 @@
           description_tsim^5
           alternate_ids_tsim^3	
 	  identifier_tesim
+	  subject_title_tesim
+	  contents_tesim
 	  full_text_tesimv
         </str>
 	<!-- A Person is a first-class catalog result, but on an empty query every

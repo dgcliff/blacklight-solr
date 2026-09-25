@@ -193,6 +193,21 @@
     <!-- you must define copyField source and dest fields explicity or schemaBrowser doesn't work -->
     <field name="all_text_timv" type="text" stored="true" indexed="true" multiValued="true" termVectors="true" termPositions="true" termOffsets="true"/>
 
+    <!-- Match-only fields for keyword search, filled by the copyFields below.
+         Nothing reads them back, so they are not stored.
+
+         descriptive_keywords_tesim makes the subjects, names, genre, publisher
+         and place searchable. Atlas writes those as *_ssim strings for the
+         facets, and a string only matches its whole value exactly.
+
+         The two *_stem_tesim fields are stemmed twins of the title and the
+         abstract, so a plural query matches a singular record. They sit beside
+         the originals rather than replacing them: the `text` type is shared by
+         every *_tsim field, and title_tsim is also the result heading. -->
+    <field name="descriptive_keywords_tesim" type="text_en" stored="false" indexed="true" multiValued="true"/>
+    <field name="title_stem_tesim" type="text_en" stored="false" indexed="true" multiValued="true"/>
+    <field name="description_stem_tesim" type="text_en" stored="false" indexed="true" multiValued="true"/>
+
 
   </fields>
 
@@ -206,6 +221,26 @@
   <copyField source="*_tesim" dest="all_text_timv" maxChars="3000"/>
   <copyField source="*_ssim" dest="all_text_timv" maxChars="3000"/>
   <copyField source="*_si" dest="all_text_timv" maxChars="3000"/>
+
+  <!-- An allowlist, and never a glob: *_ssim also carries depositor NUIDs and
+       group names, which must not become search terms. language_ssim is left
+       out on purpose, because "English" in a query would match every English
+       record. No maxChars is needed, because the destinations are tokenised. -->
+  <copyField source="subject_ssim" dest="descriptive_keywords_tesim"/>
+  <copyField source="subject_geo_ssim" dest="descriptive_keywords_tesim"/>
+  <copyField source="subject_era_ssim" dest="descriptive_keywords_tesim"/>
+  <copyField source="subject_person_ssim" dest="descriptive_keywords_tesim"/>
+  <copyField source="subject_corporate_ssim" dest="descriptive_keywords_tesim"/>
+  <copyField source="genre_ssim" dest="descriptive_keywords_tesim"/>
+  <copyField source="creator_ssim" dest="descriptive_keywords_tesim"/>
+  <copyField source="contributor_ssim" dest="descriptive_keywords_tesim"/>
+  <copyField source="publisher_ssim" dest="descriptive_keywords_tesim"/>
+  <copyField source="place_ssim" dest="descriptive_keywords_tesim"/>
+  <copyField source="photo_category_ssim" dest="descriptive_keywords_tesim"/>
+
+  <copyField source="title_tsim" dest="title_stem_tesim"/>
+  <copyField source="title_plain_tsim" dest="title_stem_tesim"/>
+  <copyField source="description_tsim" dest="description_stem_tesim"/>
 
   <!-- A copy of a *_tsim source into a field whose analyzer keeps the value
        whole - a KeywordTokenizer suggester field, say - needs maxChars. Valkyrie
@@ -266,10 +301,15 @@
                geo="true" distanceUnits="kilometers" numberType="_bbox_coord" storeSubFields="false"/>
     <fieldType name="_bbox_coord" class="solr.DoublePointField" docValues="true" stored="false"/>
 
+    <!-- text and text_en must drop the same stopwords. A word removed by one
+         type but kept by the other still counts toward edismax's mm through
+         the field that kept it, so "the whale" would demand a "the" somewhere.
+         Every field in the search handler's qf is one of these two types. -->
     <fieldType name="text" class="solr.TextField" omitNorms="false">
       <analyzer>
         <tokenizer class="solr.ICUTokenizerFactory"/>
         <filter class="solr.ICUFoldingFilterFactory"/>  <!-- NFKC, case folding, diacritics removed -->
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
     </fieldType>
@@ -296,6 +336,7 @@
       <analyzer>
         <tokenizer class="solr.ICUTokenizerFactory"/>
         <filter class="solr.ICUFoldingFilterFactory"/>  <!-- NFKC, case folding, diacritics removed -->
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
         <filter class="solr.EnglishPossessiveFilterFactory"/>
         <!-- EnglishMinimalStemFilterFactory is less aggressive than PorterStemFilterFactory: -->
         <filter class="solr.EnglishMinimalStemFilterFactory"/>

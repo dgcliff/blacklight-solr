@@ -56,19 +56,35 @@
             keyword-dense enough that any boost would let it outrank a real
             abstract.
 
-            Both notes sit outside the element on purpose. A comment inside it
+            descriptive_keywords_tesim holds the subjects, names, genre,
+            publisher and place: v1 searched them, and v2 facets them. It is
+            boosted below the abstract, because a heading is weaker evidence
+            than prose, and a keyword-dense subject list would otherwise
+            outrank a real description.
+
+            title_stem_tesim and description_stem_tesim are stemmed twins, so
+            "whales" finds "The whale". Each is boosted at half its original,
+            and the original stays in the list: a record using the reader's
+            exact form still ranks above one that matches only after stemming.
+            dismax takes the best field per word, so a word found in both
+            fields is not counted twice.
+
+            All these notes sit outside the element on purpose. A comment inside it
             risks a parser reading only the text before the comment, and that
             failure is silent: search simply stops matching.
        -->
         <str name="qf">
 	  title_tsim^10
+	  title_stem_tesim^5
 	  title_plain_tsim
 	  title_variant_tesim^4
           description_tsim^5
-          alternate_ids_tsim^3	
+          description_stem_tesim^2.5
+          alternate_ids_tsim^3
 	  identifier_tesim
 	  subject_title_tesim
 	  contents_tesim
+	  descriptive_keywords_tesim^2
 	  full_text_tesimv
         </str>
 	<!-- A Person is a first-class catalog result, but on an empty query every

@@ -69,6 +69,13 @@
             dismax takes the best field per word, so a word found in both
             fields is not counted twice.
 
+            name_variant_teim holds the diminutive and formal forms of each
+            personal name, so "Tim" finds Timothy and the reverse. It sits at
+            the default boost, below descriptive_keywords_tesim, so a record
+            using the reader's own form of the name ranks first. It stays out
+            of pf: a phrase boost on a derived field would lift an expanded
+            match over an exact one.
+
             All these notes sit outside the element on purpose. A comment inside it
             risks a parser reading only the text before the comment, and that
             failure is silent: search simply stops matching.
@@ -85,6 +92,7 @@
 	  subject_title_tesim
 	  contents_tesim
 	  descriptive_keywords_tesim^2
+	  name_variant_teim
 	  full_text_tesimv
         </str>
 	<!-- A Person is a first-class catalog result, but on an empty query every

@@ -76,6 +76,12 @@
             and the originals still outrank both. They stay out of pf, as the
             minimal twins do.
 
+            title_split_tesim splits a title written as one word, such as a
+            filename ("final_report_FINAL(1).docx"), into the words a reader
+            types. It sits at the default boost, so an ordinary title using
+            those words still ranks first. It stays out of pf, as the stemmed
+            twins do.
+
             name_variant_teim holds the diminutive and formal forms of each
             personal name, so "Tim" finds Timothy and the reverse. It sits at
             the default boost, below descriptive_keywords_tesim, so a record
@@ -92,6 +98,7 @@
 	  title_stem_tesim^5
 	  title_kstem_tesim^5
 	  title_plain_tsim
+	  title_split_tesim
 	  title_variant_tesim^4
           description_tsim^5
           description_stem_tesim^2.5

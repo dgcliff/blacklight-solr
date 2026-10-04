@@ -209,12 +209,18 @@
          KStem, so "archival" finds "Archives" and "studying" finds "study".
          They back up the minimal twins rather than replacing them: KStem keeps
          plurals that are words of their own, such as "letters" and "arts",
-         which the minimal stemmer joins to "letter" and "art". -->
+         which the minimal stemmer joins to "letter" and "art".
+
+         title_split_tesim splits the words a filename joins. Cerberus titles a
+         single-file deposit with the file's name, and the ICU tokenizer keeps
+         "final_report" and "change.observations" whole and leaves camelCase
+         alone, so "report" could not find "final_report_FINAL(1).docx". -->
     <field name="descriptive_keywords_tesim" type="text_en" stored="false" indexed="true" multiValued="true"/>
     <field name="title_stem_tesim" type="text_en" stored="false" indexed="true" multiValued="true"/>
     <field name="description_stem_tesim" type="text_en" stored="false" indexed="true" multiValued="true"/>
     <field name="title_kstem_tesim" type="text_en_kstem" stored="false" indexed="true" multiValued="true"/>
     <field name="description_kstem_tesim" type="text_en_kstem" stored="false" indexed="true" multiValued="true"/>
+    <field name="title_split_tesim" type="text_split" stored="false" indexed="true" multiValued="true"/>
 
 
   </fields>
@@ -253,6 +259,9 @@
   <copyField source="title_tsim" dest="title_kstem_tesim"/>
   <copyField source="title_plain_tsim" dest="title_kstem_tesim"/>
   <copyField source="description_tsim" dest="description_kstem_tesim"/>
+
+  <copyField source="title_tsim" dest="title_split_tesim"/>
+  <copyField source="title_plain_tsim" dest="title_split_tesim"/>
 
   <!-- A copy of a *_tsim source into a field whose analyzer keeps the value
        whole - a KeywordTokenizer suggester field, say - needs maxChars. Valkyrie
@@ -374,6 +383,37 @@
         <filter class="solr.EnglishPossessiveFilterFactory"/>
         <filter class="solr.KStemFilterFactory"/>
         <filter class="solr.TrimFilterFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- Words joined the way a filename joins them: split on "_", on "." and
+         at camelCase, keeping the original token, so "report" finds
+         "final_report_FINAL(1).docx" and "coastal survey" finds
+         "CoastalSurvey_2024-v2.pdf". splitOnNumerics="0" keeps "v2" and "0423"
+         whole. Folding comes after the split, or there would be no case change
+         left to split on. FlattenGraphFilter must follow the graph filter at
+         index time.
+
+         The stop filter must match the other title fields. A field that keeps
+         a stop word the others drop makes edismax require every word in one
+         field, and "history of boston" would stop finding a record with
+         "History" in its title and "Boston" in its description. -->
+    <fieldType name="text_split" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.ICUTokenizerFactory"/>
+        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1"
+                splitOnCaseChange="1" splitOnNumerics="0" catenateWords="1" preserveOriginal="1"
+                stemEnglishPossessive="1"/>
+        <filter class="solr.FlattenGraphFilterFactory"/>
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.ICUTokenizerFactory"/>
+        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1"
+                splitOnCaseChange="1" splitOnNumerics="0" preserveOriginal="1" stemEnglishPossessive="1"/>
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
       </analyzer>
     </fieldType>
 

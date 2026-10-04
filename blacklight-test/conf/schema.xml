@@ -389,10 +389,19 @@
     <!-- Words joined the way a filename joins them: split on "_", on "." and
          at camelCase, keeping the original token, so "report" finds
          "final_report_FINAL(1).docx" and "coastal survey" finds
-         "CoastalSurvey_2024-v2.pdf". splitOnNumerics="0" keeps "v2" and "0423"
-         whole. Folding comes after the split, or there would be no case change
-         left to split on. FlattenGraphFilter must follow the graph filter at
-         index time.
+         "CoastalSurvey_2024-v2.pdf". Folding comes after the split, or there
+         would be no case change left to split on. FlattenGraphFilter must
+         follow each graph filter at index time.
+
+         The index side splits twice. The first pass splits on punctuation and
+         case; the second splits letters from digits, so "internet" finds
+         "nr32w29201906internet.pdf". Each keeps the tokens it was given, so
+         "covid19" and "v2" stay searchable whole. preserveOriginal keeps only
+         the whole input token, which is why one pass with splitOnNumerics="1"
+         would lose them. The query side splits once and never on digits:
+         splitting "mp3" in a query would make edismax require every word in
+         one field, and "mp3 recordings" would stop finding a record with
+         "recordings" in its title and "MP3" in its description.
 
          The stop filter must match the other title fields. A field that keeps
          a stop word the others drop makes edismax require every word in one
@@ -404,6 +413,9 @@
         <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1"
                 splitOnCaseChange="1" splitOnNumerics="0" catenateWords="1" preserveOriginal="1"
                 stemEnglishPossessive="1"/>
+        <filter class="solr.FlattenGraphFilterFactory"/>
+        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1"
+                splitOnCaseChange="0" splitOnNumerics="1" preserveOriginal="1" stemEnglishPossessive="0"/>
         <filter class="solr.FlattenGraphFilterFactory"/>
         <filter class="solr.ICUFoldingFilterFactory"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
